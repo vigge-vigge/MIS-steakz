@@ -26,18 +26,17 @@ const Cart: React.FC = () => {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);  const handlePlaceOrder = async () => {
-    // For cashiers, require delivery address for walk-in orders
-    if (user?.role === 'CASHIER' && !deliveryAddress.trim()) {
-      setDeliveryAddress('In-store pickup'); // Default for cashier orders
-    }
-    
     if (!deliveryAddress.trim()) {
       alert('Please enter a delivery address');
       return;
     }
 
     try {
-      await placeOrder(deliveryAddress, user?.branchId);
+      // For customers, use their default branch or branch 7
+      // For cashiers, use their assigned branch
+      const branchId = user?.role === 'CASHIER' ? user?.branchId : (user?.branchId || 7);
+      
+      await placeOrder(deliveryAddress, branchId);
       setOrderSuccess(true);
       setDeliveryAddress('');
       setShowOrderForm(false);
@@ -294,8 +293,7 @@ const Cart: React.FC = () => {
                 >
                   Cancel
                 </button>
-                
-                <button
+                  <button
                   onClick={handlePlaceOrder}
                   disabled={isPlacingOrder}
                   style={{
@@ -309,7 +307,11 @@ const Cart: React.FC = () => {
                     flex: 1
                   }}
                 >
-                  {isPlacingOrder ? 'Placing Order...' : `Confirm Order (${formatPrice(getTotalPrice())})`}
+                  {isPlacingOrder ? 'Placing Order...' : 
+                    user?.role === 'CASHIER' 
+                      ? `Confirm Order (${formatPrice(getTotalPrice())})` 
+                      : `Place Order (${formatPrice(getTotalPrice())})`
+                  }
                 </button>
               </div>
             </div>

@@ -10,8 +10,16 @@ const createReceipt = async (req, res) => {
     try {
         const { orderId, subtotal, tax, discount = 0, total, paymentMethod, customerName } = req.body;
         const user = req.user;
-        if (!user || !['CASHIER', 'BRANCH_MANAGER', 'ADMIN'].includes(user.role)) {
-            return res.status(403).json({ message: 'Only cashiers can create receipts' });
+        if (!user || !['CUSTOMER', 'CASHIER', 'BRANCH_MANAGER', 'ADMIN'].includes(user.role)) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+        if (user.role === 'CUSTOMER') {
+            const order = await prisma_1.default.order.findUnique({
+                where: { id: orderId }
+            });
+            if (!order || order.customerId !== user.id) {
+                return res.status(403).json({ message: 'You can only create receipts for your own orders' });
+            }
         }
         const order = await prisma_1.default.order.findUnique({
             where: { id: orderId }
@@ -25,12 +33,12 @@ const createReceipt = async (req, res) => {
         if (existingReceipt) {
             return res.status(400).json({ message: 'Receipt already exists for this order' });
         }
-        const cashier = await prisma_1.default.user.findUnique({
+        const userRecord = await prisma_1.default.user.findUnique({
             where: { id: user.id },
             select: { username: true }
         });
-        if (!cashier) {
-            return res.status(404).json({ message: 'Cashier not found' });
+        if (!userRecord) {
+            return res.status(404).json({ message: 'User not found' });
         }
         const receiptNumber = `REC-${Date.now()}-${orderId}`;
         const receipt = await prisma_1.default.receipt.create({
@@ -42,7 +50,7 @@ const createReceipt = async (req, res) => {
                 total,
                 paymentMethod,
                 customerName,
-                cashierName: cashier.username,
+                cashierName: userRecord.username,
                 orderId,
                 cashierId: user.id
             },

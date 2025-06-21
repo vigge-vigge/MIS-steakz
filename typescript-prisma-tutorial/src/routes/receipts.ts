@@ -14,8 +14,8 @@ function asyncHandler(fn: any) {
 // All receipt routes require authentication
 router.use(authenticateToken);
 
-// Create receipt for an order - accessible by cashiers and management
-router.post('/', authorizeRole(['CASHIER', 'BRANCH_MANAGER', 'ADMIN']), asyncHandler(createReceipt));
+// Create receipt for an order - accessible by customers, cashiers and management
+router.post('/', authorizeRole(['CUSTOMER', 'CASHIER', 'BRANCH_MANAGER', 'ADMIN']), asyncHandler(createReceipt));
 
 // Get all receipts (with filtering) - accessible by cashiers and management
 router.get('/', authorizeRole(['CASHIER', 'BRANCH_MANAGER', 'ADMIN']), asyncHandler(getReceipts));

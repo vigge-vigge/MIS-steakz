@@ -133,12 +133,20 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 export const authorizeRole = (roles: Role[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     // Check if user is authenticated and has a valid role
-    if (!req.user || !req.user.role || !roles.includes(req.user.role)) {
+    if (!req.user || !req.user.role) {
+      res.status(403).json({ 
+        message: `Access denied. Authentication required.`
+      });
+      return;
+    }
+
+    if (!roles.includes(req.user.role)) {
       res.status(403).json({ 
         message: `Access denied. Required role: ${roles.join(' or ')}`
       });
       return;
     }
+    
     next();
   };
 };

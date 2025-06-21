@@ -33,9 +33,8 @@ const MenuPage: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
   if (loading) return <div style={{ padding: 40 }}>Loading...</div>;
-  if (error) return <div style={{ padding: 40, color: '#b91c1c' }}>{error}</div>;
-  const isChef = user?.role === 'CHEF';
-  const canOrder = user && user.role !== 'CHEF' && user.role !== 'ADMIN';
+  if (error) return <div style={{ padding: 40, color: '#b91c1c' }}>{error}</div>;  const isChef = user?.role === 'CHEF';
+  const canOrder = user && (user.role === 'CUSTOMER' || user.role === 'CASHIER');
   
   const handleAddToCart = (dish: MenuItemWithIngredients) => {
     if (!dish.isAvailable) {

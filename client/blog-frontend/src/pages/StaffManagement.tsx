@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import * as api from '../services/api';
 import { StaffMember, Role, Branch } from '../types';
-import { createUser } from '../services/api';
+import { createStaffMember } from '../services/api';
 import AdminCard from '../components/admin/AdminCard';
 import '../components/admin/AdminCard.css';
 
@@ -21,10 +21,9 @@ const StaffManagement: React.FC = () => {
     password: '',
     role: 'CHEF' as Role,
     branchId: undefined as number | undefined,
-  });
-  const canCreateStaff = hasPermission(['ADMIN', 'GENERAL_MANAGER', 'BRANCH_MANAGER']);
+  });  const canCreateStaff = hasPermission(['ADMIN', 'GENERAL_MANAGER', 'BRANCH_MANAGER']);
   const canEditStaff = hasPermission(['ADMIN', 'GENERAL_MANAGER', 'BRANCH_MANAGER']);
-  const canDeleteStaff = hasPermission(['ADMIN', 'GENERAL_MANAGER']);const loadStaff = useCallback(async () => {
+  const canDeleteStaff = hasPermission(['ADMIN', 'GENERAL_MANAGER', 'BRANCH_MANAGER']);const loadStaff = useCallback(async () => {
     try {      setLoading(true);
       setError('');
       
@@ -89,7 +88,7 @@ const StaffManagement: React.FC = () => {
       // For branch managers, automatically set their branch
       const branchId = user?.role === 'BRANCH_MANAGER' ? user.branchId : formData.branchId;
       
-      await createUser({
+      await createStaffMember({
         username: formData.username,
         email: formData.email,
         password: formData.password,

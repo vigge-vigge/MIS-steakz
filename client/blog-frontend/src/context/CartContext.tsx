@@ -115,13 +115,25 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     setIsPlacingOrder(true);
     
-    try {      const orderData = {
-        branchId: branchId || 7, // Default to branch 7 (first available branch)
+    try {
+      // For customers, ensure they have a default branch or determine branch from address
+      let targetBranchId = branchId;
+      
+      if (user.role === 'CUSTOMER') {
+        // For customers, use provided branch or default to branch 7
+        targetBranchId = branchId || user.branchId || 7;
+      } else {
+        // For staff (cashiers), use their assigned branch or provided branch
+        targetBranchId = branchId || user.branchId || 7;
+      }      const orderData = {
+        branchId: targetBranchId,
         items: items.map(item => ({
           menuItemId: item.menuItem.id,
           quantity: item.quantity
         })),
         deliveryAddress
+        // For customers, let backend handle customer ID automatically
+        // For cashiers, they can specify customer info via customerName parameter
       };
 
       console.log('Placing order with data:', orderData);

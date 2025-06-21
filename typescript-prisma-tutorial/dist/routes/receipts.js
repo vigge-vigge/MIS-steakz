@@ -13,7 +13,7 @@ function asyncHandler(fn) {
     };
 }
 router.use(authMiddleware_1.authenticateToken);
-router.post('/', (0, authMiddleware_1.authorizeRole)(['CASHIER', 'BRANCH_MANAGER', 'ADMIN']), asyncHandler(receiptController_1.createReceipt));
+router.post('/', (0, authMiddleware_1.authorizeRole)(['CUSTOMER', 'CASHIER', 'BRANCH_MANAGER', 'ADMIN']), asyncHandler(receiptController_1.createReceipt));
 router.get('/', (0, authMiddleware_1.authorizeRole)(['CASHIER', 'BRANCH_MANAGER', 'ADMIN']), asyncHandler(receiptController_1.getReceipts));
 router.get('/stats', (0, authMiddleware_1.authorizeRole)(['BRANCH_MANAGER', 'ADMIN']), asyncHandler(receiptController_1.getReceiptStats));
 router.get('/:id', (0, authMiddleware_1.authorizeRole)(['CASHIER', 'BRANCH_MANAGER', 'ADMIN']), asyncHandler(receiptController_1.getReceiptById));

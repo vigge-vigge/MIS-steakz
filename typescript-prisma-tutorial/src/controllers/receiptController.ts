@@ -9,11 +9,20 @@ import prisma from '../utils/prisma';
 export const createReceipt = async (req: Request, res: Response) => {
   try {
     const { orderId, subtotal, tax, discount = 0, total, paymentMethod, customerName } = req.body;
-    const user = req.user;
+    const user = req.user;    if (!user || !['CUSTOMER', 'CASHIER', 'BRANCH_MANAGER', 'ADMIN'].includes(user.role)) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
 
-    if (!user || !['CASHIER', 'BRANCH_MANAGER', 'ADMIN'].includes(user.role)) {
-      return res.status(403).json({ message: 'Only cashiers can create receipts' });
-    }    // Verify order exists and is completed
+    // For customers, verify they own the order
+    if (user.role === 'CUSTOMER') {
+      const order = await prisma.order.findUnique({
+        where: { id: orderId }
+      });
+      
+      if (!order || order.customerId !== user.id) {
+        return res.status(403).json({ message: 'You can only create receipts for your own orders' });
+      }
+    }// Verify order exists and is completed
     const order = await prisma.order.findUnique({
       where: { id: orderId }
     });
@@ -29,16 +38,14 @@ export const createReceipt = async (req: Request, res: Response) => {
 
     if (existingReceipt) {
       return res.status(400).json({ message: 'Receipt already exists for this order' });
-    }
-
-    // Get cashier username from database
-    const cashier = await prisma.user.findUnique({
+    }    // Get user username from database
+    const userRecord = await prisma.user.findUnique({
       where: { id: user.id },
       select: { username: true }
     });
 
-    if (!cashier) {
-      return res.status(404).json({ message: 'Cashier not found' });
+    if (!userRecord) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
     // Generate unique receipt number
@@ -53,7 +60,7 @@ export const createReceipt = async (req: Request, res: Response) => {
         total,
         paymentMethod,
         customerName,
-        cashierName: cashier.username,
+        cashierName: userRecord.username,
         orderId,
         cashierId: user.id
       },

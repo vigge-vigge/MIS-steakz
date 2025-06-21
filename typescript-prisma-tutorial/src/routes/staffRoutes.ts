@@ -19,10 +19,10 @@ router.get(
   getStaffMembers
 );
 
-// Create staff - accessible by ADMIN and GENERAL_MANAGER
+// Create staff - accessible by ADMIN, GENERAL_MANAGER, and BRANCH_MANAGER
 router.post(
   '/',
-  authorizeRole(['ADMIN', 'GENERAL_MANAGER']),
+  authorizeRole(['ADMIN', 'GENERAL_MANAGER', 'BRANCH_MANAGER']),
   createStaffMember
 );
 
@@ -33,10 +33,10 @@ router.put(
   updateStaffMember
 );
 
-// Delete staff - accessible by ADMIN and GENERAL_MANAGER
+// Delete staff - accessible by ADMIN, GENERAL_MANAGER, and BRANCH_MANAGER
 router.delete(
   '/:id',
-  authorizeRole(['ADMIN', 'GENERAL_MANAGER']),
+  authorizeRole(['ADMIN', 'GENERAL_MANAGER', 'BRANCH_MANAGER']),
   deleteStaffMember
 );
 
